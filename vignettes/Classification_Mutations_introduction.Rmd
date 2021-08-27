@@ -1,0 +1,227 @@
+---
+title: "Introduction to Classification of Human Mutations"
+output:
+  html_document:
+    theme: united
+    toc: yes
+  word_document:
+    toc: yes
+vignette: >
+  %\VignetteIndexEntry{Classification_Mutations_introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+# Simpati introductive vignette
+
+Introduction of Simpati applied on somatic mutation data of cancer patients
+This workflow is recommended for who wants to understand why to use Simpati.
+It focuses on the output information that Simpati provides as pathway-based classifier.
+
+Introduction because:
+
+- It shows a wrapper that allows to run Simpati with one function on human somatic mutation data or RNAseq data
+- It focuses on the workflow output and results
+
+Requirements:
+
+- Base R skills
+
+What you will get:
+
+- You will discover the reasons to use Simpati and how to apply it 
+- The descriptions of all the information and results that Simpati produces
+
+**Let's clean and prepare the enviroment for the workflow**
+
+We remove every variables, clean the RAM memory and load Simpati library
+We set the random seed in order to get always the same results out of this workflow
+We set the number of cores in order to run Simpati in parallel
+
+```{r enviroment setup up}
+#Clean workspace and memory ----
+rm(list=ls())
+gc()
+
+#Set working directory----
+gps0=getwd()
+gps0=paste(gps0,"/%s",sep="")
+rootDir=gps0
+setwd(gsub("%s","",rootDir))
+
+#Load libraries ----
+suppressWarnings(suppressMessages(
+  library("Simpati", quietly = T)
+  )
+)
+
+#Set variables ----
+#Set seed for reproduce the results
+seed=0
+#Set TRUE if you are running a introduction vignette to understand how to work with Simpati
+test_run=TRUE
+#Set the number of cores to use in the workflow
+n_cores=5
+```
+
+Simpati works with the patient’s biological profiles (e.g. gene expression profiles), the classes of the patients (e.g. cases and controls), a list of pathways and a biological interaction network (e.g. gene-gene interaction network). Simpati is designed to handle multiple biological omics but requires that the type of biological feature (e.g. gene) describing the patients is the same one that composes the pathways and the network which models how the features interact or are associated (e.g. proteins require protein-protein network). In this study, we tested Simpati in the classification of early versus late cancer stage patients. 
+
+```{r example data loading}
+#Get omic-specific patient profiles and their clinical data
+geno=tcga_data$LIHC$`LIHC_Mutation-20160128`$assay_df;see(geno)
+info=tcga_data$LIHC$`LIHC_Mutation-20160128`$clin_df;see(info)
+
+#Simpati wants the info matrix to be a two column matrix
+#patient's names | patient's class (e.g. clinical information)
+#Here we select the pathologic_stage of the patient's tumour
+info=info[,c("patientID","pathologic_stage")];see(info)
+
+#Set name of the dataset
+dataset_name="LIHC"
+#Set the semantic type of the disease for the disgnet enrichment
+disease_type=tcga_data$LIHC$semantic_type;cat(disease_type)
+#Set key words associated to the patient's disease
+key_words=tcga_data$LIHC$key_words;cat(key_words)
+
+#Gene interaction network
+net=huri_net_l$net_adj;see(net)
+
+#Pathway list
+print(pathways_l[1:2])
+
+```
+
+Simpati considers the patient’s biological profiles (e.g. genes per patients) divided into classes based on a clinical information (e.g. cases versus controls). It prepares the profiles singularly applying guilty-by-association approach to determine how much each biological feature is associated and involved with the other ones and so to the overall patient’s profile. Higher is the guilty score and more the biological feature is involved in the patient’s biology. Simpati proceeds by building a pathway-specific patient similarity network (psPSN). It determines how much each pair of patients is similarly involved in the pathway. If the members of one class are more similar (i.e. stronger intra-similarities) than the opposite patients and the two classes are not similar (i.e. weak inter-similarities), then Simpati recognizes the psPSN as signature. If the classes are likely to contain outlier patients (i.e. patients not showing the same pathway activity as the rest of the class), then Simpati performs a filtering to keep only the biggest and most representative subgroups and re-test the psPSN for being signature. Unknown patients are classified in the best pathways based on their similarities with known patients and on how much they fit in the representative subgroups of the classes (more you are friend with the leader of one group and more you are associated to that). As results, Simpati provides the classes of the unknown patients, the tested statistically significant signature pathways divided into up and down involved (new pathway activity paradigm based on similarity of propagation scores), the biological features which contributed the most to the similarities of interest, the guilty scores associated to the biological features and all the data produced during the workflow in a vectorial format easy to share or analyse.
+
+```{r wrapper for human classification}
+#Simpati classification
+Simp_res=wrapper_human_mutations(geno,info,net,pathways_l,dataset_name,disease_type,key_words,
+                                 n_cores=n_cores,test_run=test_run,seed=seed)
+
+```
+
+Simpati provides the classification performances, collects the signature pathways used to predict, returns their corresponding PSNs in vectorial format and reports their related information to allow further analysis and considerations: the average of the intra and inter similarities to let understanding which is the most cohesive class, the psPSN power translated into a scale from 1 (poor separation between classes) to 10 (strong separation) to catch the pathways which most distinguish the classes in comparison, and a probability value (p.value). The latter is assessed testing the psPSN to retrieve the same original power or higher when patients are permutated between classes. This information allows to filter out pathways which have been detected as signature due to random.
+
+**classification_res**: list which provides the classification performances
+
+- testing_prof: Includes the testing patients that have been classified
+- correct_classes: Includes the correct and original class of the testing patients
+- predicted_classes: Includes the predicted class of the testing patients
+- auroc: Includes the auroc performance measure
+- aupr: Includes the aupr performance measure
+
+```{r classification results}
+
+Simp_res$classification_res
+
+```
+
+**PSN_enr_df**: matrix with the details of the enriched pathway-specific patient similarity networks found after the classification
+
+- pathway_name: name of the pathway
+- sign_class: name of the class which is up-involved signature (strongest one) in the PSN representing the pathway
+- power: POWER of the pathway-specific patient similarity network
+- direction: up-involved (the members of the signature class are similar in the features of the pathway due to
+- they all have an high involvment of the features, while the non-signature class is heterogenous and not cohesive) or down-involved (the members of the signature class are similar in the features of the pathway due  to they all have a low involvment of the features, while the non-signature class is heterogenous and not cohesive)
+- Pvalue: probability value produced by testing the significativity of the pathway-specific PSN. Lower than 0.05 means that the PSN is signature not due to random
+- records_db_SemType: number of records in the disgnet database which associate the pathway to the user-defined disease type of the patient's
+- records_db_KeysDis: percentage of user-defined key words associated to the pathway by the disgnet database
+- records_db_cancer: percentage of features (e.g. genes) of the pathway which are associated to the patient's cancer by the human protein atlas
+
+```{r pathway enrichment results}
+
+head(Simp_res$PSN_enr_df)
+
+```
+
+**PSNs_info[,1:6]**: matrix which describes the pathway specific patient similarity networks learnt during the classification and used for the prediction of the testing patient's class
+
+- pathway_name: name of the pathway
+- class: name of the class which is up-involved signature (strongest one) in the PSN representing the pathway
+- power: POWER of the pathway-specific patient similarity network
+- minSIGN: low quantile of the signature class which is higher than the high quantile of the opposite class and of the interclass similarities
+- maxWEAK1: high quantile of the non-signature class which is lower than the low quantile of the signature class
+- maxWEAK2: high quantile of the interclass which is lower than the low quantile of the signature class
+
+
+```{r PSN information about pathways}
+
+Simp_res$PSNs_info[1:5,1:6]
+
+```
+
+
+**PSNs_info[,c(1,2,7,10,16,17,21,22)]**: matrix which describes how a pathway specific patient similarity network predicts a testing patient
+
+- This section of the matrix tackles the black box effect of the algorithm.
+- The first pathway PID_E2F_PATHWAY is a signature PSN for the L class.
+- Stop: percentage of rapresentative patients of the Signature class in which the testing patient is similar to (lower and the better)
+- Wtop: percentage of rapresentative patients of the non-Signature class in which the testing patient is similar to (lower and the better)
+- A_strength: similarity of the testing patient with the members of the Signature class
+- B_strength: similarity of the testing patient with the members of the non-Signature class
+- testing_pat: name of the testing patientTh
+- prediction: predicted class based on Stop, Wtop, A_strength and B_strength
+In this case, the testing patient E1 is predicted L because Stop is lower than Wtop and A_strength is greater than B_strength
+
+```{r PSN information about prediction}
+
+Simp_res$PSNs_info[2,c(1,2,7,11,16,17,21,22)]
+
+```
+
+**vars_l**: list that allows you to access to the data and variables used during the classification
+
+- orig_geno: the original user-provided matrix of patient's profiles
+- geno: the matrix of patient's profiles normalized and processed to use in Simpati workflow
+- net: the original feature association network
+- pathways_l: the original pathways (aka feature sets)
+- info: the original info matrix with the patient'ids and classes mapped to the new labels
+- tab_status: the classes compared in Simpati workflow
+
+```{r variables information}
+
+Simp_res$vars_l$info
+
+```
+
+**PSN_data_l$outlier_df**: matrix which indicates the likelihood of each patient to be outlier for its class
+
+```{r outliers information}
+
+Simp_res$PSN_data_l$outlier_df
+
+```
+
+**PSN_data_l$PSN_comp_l**: list in which each element includes the vectorized form of a pathway-specific PSN
+These data are handy to plot the PSN of interest or to analyse manually the pathway-specific PSN
+
+```{r PSN plot }
+
+head(Simp_res$PSN_data_l$PSN_comp_l$`PID_RB_1PATHWAY source-MSIGDB_C2 source-PID_RB_1PATHWAY down-inv`$m_sim_l$v)
+head(Simp_res$PSN_data_l$PSN_comp_l$`PID_RB_1PATHWAY source-MSIGDB_C2 source-PID_RB_1PATHWAY down-inv`$m_sim_l$col_names)
+#You can convert the vectorized form of a PSN to get its adjacency matrix and plot it or elaborate it
+#Let's take the name of the most powerful signature PSN
+pathway_name=Simp_res$PSN_enr_df$pathway_name[order(Simp_res$PSN_enr_df$power,decreasing = T)][1]
+#Take its vector
+pathway_data=Simp_res$PSN_data_l$PSN_comp_l[pathway_name]
+pathway_PSN_v=pathway_data[[1]][["m_sim_l"]]
+#Convert it to adjancency matrix
+pathway_PSN_m=vec2m(pathway_PSN_v)
+see(pathway_PSN_m)
+#Plot it
+plot_network(pathway_PSN_m,image_name=pathway_name)
+```
+
+
+
+
+
+```

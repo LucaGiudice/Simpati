@@ -1,0 +1,202 @@
+---
+title: "Advanced Classification of Human Mutations"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Classification_Mutations_advanced}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Simpati advanced workflow
+
+Advanced example of Simpati workflow on somatic mutation data of cancer patients
+This workflow is recommended for who already went through the simplified workflow and is willing
+to learn how to work with Simpati more in details.
+
+Advanced because:
+- Every operation is made explicit
+- Long workflow
+
+Requirements:
+- Average R skills
+- Reading Simpati article
+
+**Let's clean and prepare the enviroment of the workflow**
+We remove every variables, clean the RAM memory and load Simpati library
+We set the random seed in order to get always the same results out of this workflow
+We set the number of cores in order to run Simpati in parallel
+
+```{r enviroment setup}
+#Clean workspace and memory ----
+rm(list=ls())
+gc()
+
+#Set working directory----
+gps0=getwd()
+gps0=paste(gps0,"/%s",sep="")
+rootDir=gps0
+setwd(gsub("%s","",rootDir))
+
+#Load libraries ----
+library(Simpati)
+
+#Set variables ----
+#Set seed for reproduce the results
+set.seed(0)
+#Set TRUE if you are running a introduction vignette to understand how to work with Simpati
+test_run=TRUE
+#Set the number of cores to use in the workflow
+n_cores=5
+```
+
+**Let's load the data required to run all the operations**
+
+```{r input data}
+#Load and prepare data (e.g. example user data and databases for pathway analysis ) ----
+
+#Get omic-specific patient profiles and their clinical data
+geno=tcga_data$LIHC$`LIHC_Mutation-20160128`$assay_df;see(geno)
+info=tcga_data$LIHC$`LIHC_Mutation-20160128`$clin_df;see(info)
+
+#Simpati wants the info matrix to be a two column matrix
+#patient's names | patient's class (e.g. clinical information)
+#Here we select the pathologic_stage of the patient's tumour
+info=info[,c("patientID","pathologic_stage")];see(info)
+
+#Set name of the dataset
+dataset_name="LIHC"
+#Set the semantic type of the disease for the disgnet enrichment
+disease_type=tcga_data$LIHC$semantic_type;cat(disease_type)
+#Set key words associated to the patient's disease
+key_words=tcga_data$LIHC$key_words;cat(key_words)
+
+#Gene interaction network
+data(huri_net_l)
+net=huri_net_l$net_adj;see(net)
+
+#Pathway list
+data(pathways_l);print(pathways_l[1:2])
+
+#Reduce pathways in case you are running a introduction vignette
+if(test_run){
+  pathways_l=pathways_l[1:1000]
+  pathways_l=pathways_l[grep("source-MSIGDB",names(pathways_l))]
+}
+
+#human protein atlas for normal cell lines needed for the tissue enrichment
+data(db_normal_ATLAS);see(db_normal_ATLAS)
+
+#human protein atlas for cancer cell lines needed for the tumor enrichment
+data(db_cancer_ATLAS);see(db_cancer_ATLAS)
+
+#disgnet needed for the disease-feature (aka gene) enrichment
+data(db_disgnet);see(db_disgnet)
+```
+
+**Let's prepare all the data and variables for Simpati**
+
+We first pass all the input data to the ``` data_preparation ``` function.
+This one checks and prepares the data to Simpati workflow.
+In case this step does not produce errors, then Simpati will be able to run without further problems.
+The result of the ``` data_preparation ``` function is a list of elements extracted from the input data.
+From now on, Simpati will need only this list and we will not need to pass the input data other times.
+
+```{r data preparation}
+#Data preparation
+data_l=data_preparation(geno,info,net,pathways_l,n_cores)
+#Clean
+rm(geno,info)
+```
+
+Similarly to the ``` data_preparation ``` function, there is the ``` set_variables ``` function.
+It sets and prepares all the variables required by Simpati.
+Plus, it takes extra input data if available. For example, the name of the dataset in study, the type
+of the disease associated to the disgnet database, key words associated to the patient's disease, the
+number of cores to run the workflow in parallel and the percentage of patients to include in the testing
+set of the classification. 
+The results of the ``` set_variables ``` function is a list of elements extracted from the input data.
+
+```{r variables set up}
+#Generate the object list with all the variables needed by the method
+vars_l=set_variables(data_l,dataset_name,disease_type,key_words,n_cores=n_cores,n_LOO = 0.3)
+#Clean
+rm(disease_type,key_words)
+```
+
+Let's start the classification steps.
+
+```{r classification}
+#Start to measure the running time
+start_time <- Sys.time()
+
+#Propagation
+vars_l[["geno_p"]]=rwrProp(net=vars_l$net, geno=vars_l$geno, n_cores=vars_l$n_cores);
+
+#Prepare pathways
+vars_l[["pathways_indxs_l"]]=clean_pathways(pathways_l=vars_l$pathways_l, geno=vars_l$geno_p, n_cores=vars_l$n_cores)
+
+#Predicts testing profiles
+cat("*Making pathway specific predictions of testing profiles \n")
+PSNs_info=predict_pats(vars_l);
+
+#Predict testing profiles and get classification performances
+res=get_perfs(PSNs_info)
+
+#Stop running time of classification
+end_time <- Sys.time()
+running_time=as.numeric(difftime(end_time, start_time, units = "mins")[[1]])
+
+#Save results of classification and pathway analysis
+cat("Ended classification in",running_time,"\n")
+
+cat("Starting pathway enrichment of classification results \n")
+
+#Get the updated info dataframe
+new_info=get_new_info(res,vars_l)
+#Get the pathways used in the classification
+pathways_used_l=get_used_pathways(PSNs_info,vars_l)
+
+#Data preparation
+data_l=data_preparation(vars_l$orig_geno[,new_info$patientID],new_info,vars_l$net,pathways_used_l)
+
+#Generate the object list with all the variables needed by the method
+pr_vars_l=set_variables(data_l,vars_l$dataset_name,vars_l$disease_type,vars_l$key_words,n_cores=vars_l$n_cores)
+
+#Propagation
+pr_vars_l[["geno_p"]]=rwrProp(net=pr_vars_l$net,geno=pr_vars_l$geno,n_cores=pr_vars_l$n_cores);
+
+#Prepare pathways
+pr_vars_l[["pathways_used_indxs_l"]]=clean_pathways(pathways_l=pr_vars_l$pathways_l,geno=pr_vars_l$geno_p,n_cores=pr_vars_l$n_cores)
+
+#Get signature pathways ----
+PSN_data_l=get_sign_pathways(pr_vars_l$geno_p, pr_vars_l$pathways_used_indxs_l, pr_vars_l, n_cores=pr_vars_l$n_cores)  
+
+#Get enrichment ----
+gene_sets_l=sapply(PSN_data_l$PSN_comp_l,function(x){x$m_prof_l$row_names})
+if(length(gene_sets_l)>1){
+  enrXpathway_l=get_pathway_enrich(gene_sets_l,pr_vars_l$key_words,pr_vars_l$disease_type,
+                                   db_disgnet,db_cancer_ATLAS,db_normal_ATLAS,
+                                   n_cores=3, records_only = T)
+}else{enrXpathway_l=list()}
+
+cat("Saving results and workflow data \n")
+
+#Save classification and enrichment results -----
+PSN_enr_df=PSN_data_l[["PSN_info_df"]]
+enr_PSN_df=enrXpathway_l[["enrXpathway_df"]]
+if(!is.null(enr_PSN_df)){
+  PSN_enr_df=merge(PSN_enr_df,enr_PSN_df,by="pathway_name",all.x=T)
+}
+
+save(res,PSNs_info,running_time,PSN_enr_df,file="Classification_results.rda")
+save(vars_l,pr_vars_l,PSN_data_l,enrXpathway_l,file="Enrichment_results.rda")
+
+
+```
