@@ -39,7 +39,7 @@ devtools::install_github(
 
 There are the following vignettes:
 
-1. [A Quick Start of Using Simpati Package and introduction to the results](https://github.com/LucaGiudice/Simpati/blob/main/vignettes/Classification_Mutations_introduction.Rmd)
+1. [A Quick Start of Using Simpati Package and introduction to the results](https://github.com/LucaGiudice/supplementary-Simpati/blob/main/images/Classification_Mutations_introduction.pdf)
 2. [Advanced workflow of Simpati performed with all the operations explicit](https://github.com/LucaGiudice/Simpati/blob/main/vignettes/Classification_Mutations_advanced.Rmd)
 
 ## Classification and pathway detection
