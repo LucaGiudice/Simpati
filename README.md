@@ -44,9 +44,23 @@ There are the following vignettes:
 
 <img width="700" src="https://user-images.githubusercontent.com/449218/52628723-86af3400-2eb8-11e9-968d-b7f47a408818.png" />
 
-The steps of Simpati workflow:
+The cores of Simpati workflow:
 
-The figure shows the key points of Simpati. Frame A briefly illustrates the workflow. Patient profiles colored by the class of belonging are described by biological features as genes. A gene-gene interaction network together with pathways are further input data required by the software. All profiles are individually propagated over the network. The profile’s values are replaced by scores that reflect the gene’s starting information and connections. Simpati proceeds by creating a patient similarity network for each pathway (psPSN). The pairwise similarity evaluates how much two patients have a similar pathway activity. The psPSN is decomposed into three components. Two with the intra-similarities of the class specific representative patients, while one with the inter-similarities between them.  If the similarities of one class dominate over the other two components, then the psPSN is signature. The latter is ultimately used to classify. An unknown patient is classified based on how much is like the other patients and on how much fits in the class specific representatives. Frame B shows the effect of the propagation. The position of the gene and its level of expression leads a patient to act on the other genes and so on a pathway in a unique way. Frame C shows the patient similarity used in Simpati. It evaluates how much the genes between two patients are close and high in term of propagation values. Two patients that act on a pathway from the same gene positions and with the same expression values get the maximum similarity. Frame D illustrates the biological interpretation behind a signature psPSN. One class is cohesive because the disease is leading the patients to alter similarly the same pathway. One class is sparse because led by multiple factors.
+Frame A shows the workflow
+  1. Patient profiles colored by the class of belonging are described by biological features as genes. A gene-gene interaction network together with pathways are further input data required by the software. 
+  2. All profiles are individually propagated over the network. The profile’s values are replaced by scores that reflect the gene’s starting information and connections. 
+  3. Simpati proceeds by creating a patient similarity network for each pathway (psPSN). The pairwise similarity evaluates how much two patients have a similar pathway activity. 
+  4. The psPSN is decomposed into three components. Two with the intra-similarities of the class specific representative patients, while one with the inter-similarities between them.  If the similarities of one class dominate over the other two components, then the psPSN is signature. 
+  5. The latter is ultimately used to classify. An unknown patient is classified based on how much is like the other patients and on how much fits in the class specific representatives. 
+
+Frame B shows the effect of the propagation 
+1. The position of the gene and its level of expression leads a patient to act on the other genes and so on a pathway in a unique way. 
+
+Frame C shows the patient similarity used in Simpati
+1. It evaluates how much the genes between two patients are close and high in term of propagation values. Two patients that act on a pathway from the same gene positions and with the same expression values get the maximum similarity. 
+
+Frame D illustrates the biological interpretation behind a signature psPSN. 
+1. One class is cohesive because the disease is leading the patients to alter similarly the same pathway. One class is sparse because led by multiple factors.
 
 ### Usage
 
