@@ -1,4 +1,4 @@
-# Simpati: pathway-based classifier <img src="https://user-images.githubusercontent.com/449218/54158555-03e3af80-444b-11e9-9773-070823101263.png" width=250 align="right" style="border:4px solid black;" />
+# Simpati: pathway-based classifier <img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/Simpati_logo.png" width=350 align="right" style="border:4px solid black;" />
 
 
 [![R-CMD-check](https://github.com/jokergoo/cola/workflows/R-CMD-check/badge.svg)](https://github.com/jokergoo/cola/actions)
@@ -42,7 +42,7 @@ There are the following vignettes:
 
 ## Consensus Partitioning
 
-<img width="700" src="https://user-images.githubusercontent.com/449218/52628723-86af3400-2eb8-11e9-968d-b7f47a408818.png" />
+<img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/workflow.png" />
 
 The cores of Simpati workflow:
 
@@ -91,8 +91,8 @@ Simp_res=wrapper_human_mutations(geno,info,net,pathways_l,dataset_name,disease_t
 
 Following plot shows you an example of pathway-specific patient similarity network between LIHC Late (L) stage cancer patients and Early 
 
-<img src="https://user-images.githubusercontent.com/449218/52631118-3a66f280-2ebe-11e9-8dea-0172d9beab91.png" />
-
+<img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/BIOCARTA_MAPK_PATHWAY%20source-MSIGDB_C2%20source-BIOCARTA_MAPK_PATHWAY%20down-inv.png" />
+<img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/HALLMARK_HEDGEHOG_SIGNALING%20source-MSIGDB_C2%20source-HALLMARK_HEDGEHOG_SIGNALING%20up-inv.png" />
 
 ## License
 
