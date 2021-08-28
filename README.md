@@ -8,12 +8,14 @@
 
 ## Features
 
-1. It finds novel enriched pathways between two classes in comparison (e.g. GSEA)
+1. It finds novel enriched pathways between two classes in comparison
 2. It exploits the novel paradigm of patient similarity networks to detect pathways as no other method
 3. It generates information and data to further manual analysis and explorations
-4. It allows to plot an enriched pathway in form of patient similarity network to have a beautiful informative image for the paper which allows to highlight the similarities and dissimilarities between patients
-5. It performs an outlier dection and retrieves how much each patient is likely to not fit in its own class defined by its clinical information
-6. It allows to explore the signature pathway of a patient class with a graphical interface
+4. It can be applied of multiple omics
+5. It does not require technical parameters, only the patient's/samples's information
+6. It allows to plot an enriched pathway in form of patient similarity network to have a beautiful informative image for the paper which allows to highlight the similarities and dissimilarities between patients
+7. It performs an outlier dection and retrieves how much each patient is likely to not fit in its own class defined by its clinical information
+8. It allows to explore the signature pathway of a patient class with a graphical interface
 
 ## Citation
 
@@ -40,7 +42,7 @@ There are the following vignettes:
 1. [A Quick Start of Using Simpati Package and introduction to the results](https://github.com/LucaGiudice/Simpati/blob/main/vignettes/Classification_Mutations_introduction.Rmd)
 2. [Advanced workflow of Simpati performed with all the operations explicit](https://github.com/LucaGiudice/Simpati/blob/main/vignettes/Classification_Mutations_advanced.Rmd)
 
-## Consensus Partitioning
+## Classification and pathway detection
 
 <img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/workflow.png" />
 
@@ -89,10 +91,9 @@ Simp_res=wrapper_human_mutations(geno,info,net,pathways_l,dataset_name,disease_t
 
 ### Plots
 
-Following plot shows you an example of pathway-specific patient similarity network between LIHC Late (L) stage cancer patients and Early 
+Following plot shows you an example of pathway-specific patient similarity network between LIHC Late (L) stage cancer patients and Early (E)
 
-<img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/BIOCARTA_MAPK_PATHWAY%20source-MSIGDB_C2%20source-BIOCARTA_MAPK_PATHWAY%20down-inv.png" />
-<img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/HALLMARK_HEDGEHOG_SIGNALING%20source-MSIGDB_C2%20source-HALLMARK_HEDGEHOG_SIGNALING%20up-inv.png" />
+<img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/BIOCARTA_MAPK_PATHWAY%20source-MSIGDB_C2%20source-BIOCARTA_MAPK_PATHWAY%20down-inv.png" /> <img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/HALLMARK_HEDGEHOG_SIGNALING%20source-MSIGDB_C2%20source-HALLMARK_HEDGEHOG_SIGNALING%20up-inv.png" />
 
 ## License
 
