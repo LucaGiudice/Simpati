@@ -37,8 +37,8 @@ devtools::install_github(
 
 There are the following vignettes:
 
-1. [A Quick Start of Using Simpati Package and introduction to the results](https://jokergoo.github.io/cola_vignettes/cola_quick.html)
-2. [Advanced workflow of Simpati performed with all the operations explicit](https://jokergoo.github.io/cola_vignettes/cola.html)
+1. [A Quick Start of Using Simpati Package and introduction to the results](https://github.com/LucaGiudice/Simpati/blob/main/vignettes/Classification_Mutations_introduction.Rmd)
+2. [Advanced workflow of Simpati performed with all the operations explicit](https://github.com/LucaGiudice/Simpati/blob/main/vignettes/Classification_Mutations_advanced.Rmd)
 
 ## Consensus Partitioning
 
