@@ -70,7 +70,7 @@ plot_network = function(m,top_connections=30,node_highlight="all", image_type="p
   el=adj2edg(m2)
 
   #Set the default colors for the nodes and edges due to the groups
-  edge_cols=c("#CC0033","#948df7","#0066FF")
+  edge_cols=c("#CC0033","#96b5a3","#0066FF")
   node_cols=c("#FF3300","#00FF66","#00CCFF")
   
   #Set the colors for the nodes
