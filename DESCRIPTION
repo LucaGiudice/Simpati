@@ -1,7 +1,7 @@
 Package: Simpati
 Type: Package
 Title: Pathway-based classifier exploits patient similarity network paradigm
-Version: 0.1.0
+Version: 0.2.0
 Author: Giudice Luca
 Maintainer: Giudice Luca <luca.giudce@univr.it>
 Description: Pathway-based classifier exploits patient similarity network paradigm
