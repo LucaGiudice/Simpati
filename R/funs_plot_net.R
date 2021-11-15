@@ -4,11 +4,11 @@
 #' @param label2 a string indicating the name of the second class
 #' @param top_connections an integer in [1,100], percentage of top connection to visualize
 #' @param node_highlight a string or vector of strinvs indicating the node id(s) to highlight in the network. By default
-#' all connections in top_connection are highlited 
+#' all connections in top_connection are highlited
 #' @param image_type a string indicating the format of the output image
 #' @param image_name a string containing the name of the output image
 #' @return a list representing a qgraph object. The method saves an image with the visualization
-#' of the network 
+#' of the network
 #' @import data.table
 #' @import matrixStats
 #' @import scales
@@ -44,7 +44,7 @@ plot_network = function(m,top_connections=30,node_highlight="all", image_type="p
   if(end_l2<end_l1){end_l1=end_l2}
   label1=substr(label1,1,end_l1)
   label2=substr(label2,1,end_l1)
-  
+
   #Find the nodes which have very similar interactions to all the other nodes
   #Creating groups of nodes, everytime reducing the starting set of nodes of the 20%
   #Finally, represent each group by only one node to reduce the number of future plotted nodes
@@ -62,22 +62,22 @@ plot_network = function(m,top_connections=30,node_highlight="all", image_type="p
   #Compute adjusted eigen centrality for each node which will be rapresented
   #as size of the node in the plot
   eigs=eig_score_adj(m2,nAs)
-  
+
   #Rescaled score for matching with node size
   eigs_adj_sc=scales::rescale(eigs[,"eigs_adj"], to=c(2,5))
-  
+
   #Produce edge list
   el=adj2edg(m2)
 
   #Set the default colors for the nodes and edges due to the groups
   edge_cols=c("#CC0033","#96b5a3","#0066FF")
   node_cols=c("#FF3300","#00FF66","#00CCFF")
-  
+
   #Set the colors for the nodes
   node_col=memb
   node_col[node_col==label1]=node_cols[1]
   node_col[node_col==label2]=node_cols[3]
-  
+
   #Create edge list annotation converting edges to values and setting their colors
   el_ann=cbind(substr(el[,1],1,end_l1),substr(el[,2],1,end_l1))
   el_ann[el_ann==label1]=0
@@ -90,7 +90,7 @@ plot_network = function(m,top_connections=30,node_highlight="all", image_type="p
   rs[rs=="1"]=edge_cols[2]
   rs[rs=="2"]=edge_cols[3]
   el_ann$col_edges=rs
-  
+
   #Prepare node annotation s.t. if a node is representing a group then it has it
   #in the annotation and future legend
   node_ann = "start"
@@ -107,12 +107,12 @@ plot_network = function(m,top_connections=30,node_highlight="all", image_type="p
       node_ann=c(node_ann,B_text)
       next
     }
-    
+
     node_ann=c(node_ann,node_name)
   }
   node_ann=node_ann[-1]
   names(node_ann)=node_names
-  
+
   #Network plot
   cat("Plotting \n")
   if(top_connections < 0 || top_connections > 100){
