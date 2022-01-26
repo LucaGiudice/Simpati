@@ -1,10 +1,7 @@
 # Simpati: pathway-based classifier <img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/Simpati_logo.png" width=350 align="right" style="border:4px solid black;" />
 
-
-[![R-CMD-check](https://github.com/jokergoo/cola/workflows/R-CMD-check/badge.svg)](https://github.com/jokergoo/cola/actions)
 [ ![bioc](https://bioconductor.org/shields/downloads/devel/cola.svg) ](http://bioconductor.org/packages/stats/bioc/cola)
 [ ![bioc](http://bioconductor.org//shields/lastcommit/devel/bioc/cola.svg) ](http://bioconductor.org/checkResults/devel/bioc-LATEST/cola/)
-
 
 ## Features
 
